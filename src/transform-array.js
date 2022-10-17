@@ -13,46 +13,39 @@ const { NotImplementedError } = require('../extensions/index.js');
  * transform([1, 2, 3, '--discard-prev', 4, 5]) => [1, 2, 4, 5]
  * 
  */
-function transform(arr) {
-  if (!Array.isArray(arr)) throw new Error("\'arr\' parameter must be an instance of the Array!");
-  let isCommand = false;
-  for( let q = 0; q < arr.length; q++){
-    if(typeof arr[q] === 'string' || arr[q] instanceof String){
-      switch(arr[q]){
-        case '--discard-next':
-          if(q < arr.length-1)
-            arr.splice(q+1, 1);
-          isCommand = true;
-          break;
-        case '--discard-prev':
-          if(q > 0){
-            arr.splice(q-1, 1);
-            q--;
-          }
-          isCommand = true;
-          break;
-        case '--double-next':
-          if(q < arr.length-1)
-            arr.splice(q+1, 0, arr[q+1]);
-          isCommand = true;
-          break;
-        case '--double-prev':
-          if(q > 0 ){
-            arr.splice(q-1, 0, arr[q-1]);
-            q++;
-          }
-          isCommand = true;
-          break;
-      }
-      if(isCommand){
-        arr.splice(q, 1);
-        q--;
-        isCommand = false;
-      }
+function transform(array) {
+  if(!Array.isArray(array)) throw new Error("'arr' parameter must be an instance of the Array!");
+  let arr = [...array];
+  for(let i = 0; i < arr.length; i++) {
+    switch(arr[i]) {
+      case '--double-next': 
+        if(arr[i + 1])
+          arr[i] = arr[i+1];
+        else 
+          arr.splice(i, 1);
+        break;
+      case '--discard-prev':
+        if(arr[i - 1] && arr[i - 1] != -1)
+          arr.splice(i-1, 2);
+        else 
+          arr.splice(i, 1);
+        break;
+      case '--discard-next':
+        if(arr[i + 1])
+          arr.splice(i, 2, -1);
+        else 
+          arr.splice(i, 1);
+        break;
+      case '--double-prev':
+        if(arr[i - 1] && arr[i - 1] != -1)
+          arr[i] = arr[i-1];
+        else 
+          arr.splice(i, 1);
+        break;
     }
+    
   }
-
-  return arr;
+  return arr.filter(i => { if(i>=0 || Object.keys(i).length > 0) return i; });
 }
 
 module.exports = {
